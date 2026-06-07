@@ -1,0 +1,1932 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PriceKup - Planeie, calcule e lucre mais!</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome para Ícones Legais e de Negócio -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js para o Gráfico de Produtos Mais Vendidos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f3ff; /* Fundo suave roxo claro */
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c084fc;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a855f7;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between text-slate-800">
+
+    <!-- Notificações Flutuantes -->
+    <div id="notification" class="fixed top-5 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-xl shadow-lg hidden z-50 text-white font-medium transition-all">
+        Mensagem
+    </div>
+
+    <!-- ==========================================
+         MÓDULO DE LOGIN, CADASTRO E RECUPERAÇÃO (TELA PRINCIPAL)
+         ========================================== -->
+    <div id="auth-screen" class="min-h-screen flex items-center justify-center p-4 fade-in">
+        <div class="bg-white w-full max-w-4xl rounded-3xl shadow-2xl border border-purple-100 overflow-hidden grid grid-cols-1 md:grid-cols-2">
+            
+            <!-- Painel Esquerdo: Marketing e Ilustrativo -->
+            <div class="bg-gradient-to-br from-purple-600 via-indigo-700 to-purple-900 p-10 flex flex-col justify-between text-white relative">
+                <div class="absolute top-10 right-10 w-32 h-32 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse"></div>
+                <div class="absolute bottom-10 left-10 w-40 h-40 bg-pink-500 rounded-full mix-blend-multiply filter blur-2xl opacity-20 animate-pulse"></div>
+                
+                <div class="relative z-10 flex items-center gap-3">
+                    <div class="bg-white p-2.5 rounded-2xl shadow-md text-purple-700">
+                        <i class="fa-solid fa-chart-line text-2xl"></i>
+                    </div>
+                    <span class="text-2xl font-bold tracking-wider">PriceKup</span>
+                </div>
+                
+                <div class="my-12 relative z-10">
+                    <h2 class="text-3xl md:text-4xl font-extrabold leading-tight mb-4">Transformamos números em crescimento para o seu negócio! ✨</h2>
+                    <p class="text-purple-100 text-sm md:text-base font-light">
+                        Planeie, calcule ingredientes, controle as suas vendas de doces artesanais e alcance as suas metas financeiras hoje mesmo.
+                    </p>
+                </div>
+                
+                <div class="text-xs text-purple-200 relative z-10">
+                    © 2026 PriceKup. Criado para ajudar microempreendedores e produtores de alimentos artesanais.
+                </div>
+            </div>
+
+            <!-- Painel Direito: Formulários Dinâmicos -->
+            <div class="p-8 md:p-12 flex flex-col justify-center relative bg-white">
+                <div id="init-loading" class="absolute inset-0 bg-white/95 z-10 flex flex-col items-center justify-center">
+                    <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-600 mb-3"></div>
+                    <p class="text-purple-800 text-sm font-semibold">A ligar ao banco de dados PriceKup...</p>
+                </div>
+
+                <!-- Formulário de Login -->
+                <div id="login-container" class="space-y-6">
+                    <div>
+                        <h3 class="text-2xl font-bold text-slate-900 mb-1">Bem-vindo(a) de volta!</h3>
+                        <p class="text-slate-500 text-sm">Inicie sessão para gerir os seus cálculos de custos e lucros.</p>
+                    </div>
+
+                    <form id="login-form" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">E-mail</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                                    <i class="fa-regular fa-envelope"></i>
+                                </span>
+                                <input type="email" id="login-email" required class="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-purple-600 focus:border-transparent outline-none transition-all text-sm" placeholder="exemplo@pricekup.com">
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex items-center justify-between mb-1">
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500">Senha</label>
+                                <button type="button" id="btn-show-forgot" class="text-xs text-purple-600 hover:underline font-semibold">Esqueceu-se da sua senha?</button>
+                            </div>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                                    <i class="fa-solid fa-lock"></i>
+                                </span>
+                                <input type="password" id="login-password" required class="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-purple-600 focus:border-transparent outline-none transition-all text-sm" placeholder="••••••••">
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-xl transition-all shadow-lg shadow-purple-100 flex justify-center items-center h-12 text-sm">
+                            <span>Entrar na Plataforma</span>
+                        </button>
+                    </form>
+
+                    <div class="text-center pt-2">
+                        <p class="text-slate-500 text-xs">Não tem uma conta ainda? 
+                            <button type="button" id="btn-show-register" class="text-purple-600 font-bold hover:underline ml-1">Registe-se aqui</button>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Formulário de Cadastro -->
+                <div id="register-container" class="hidden space-y-6">
+                    <div>
+                        <h3 class="text-2xl font-bold text-slate-900 mb-1">Comece Grátis!</h3>
+                        <p class="text-slate-500 text-sm">Crie a sua conta para aceder à calculadora e controlo de metas.</p>
+                    </div>
+
+                    <form id="register-form" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Nome Completo</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                                    <i class="fa-regular fa-user"></i>
+                                </span>
+                                <input type="text" id="reg-name" required class="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-purple-600 focus:border-transparent outline-none transition-all text-sm" placeholder="O seu nome do negócio">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">E-mail</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                                    <i class="fa-regular fa-envelope"></i>
+                                </span>
+                                <input type="email" id="reg-email" required class="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-purple-600 focus:border-transparent outline-none transition-all text-sm" placeholder="exemplo@pricekup.com">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Senha de Acesso</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                                    <i class="fa-solid fa-lock"></i>
+                                </span>
+                                <input type="password" id="reg-password" required minlength="6" class="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-purple-600 focus:border-transparent outline-none transition-all text-sm" placeholder="Mínimo 6 caracteres">
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3 px-4 rounded-xl transition-all shadow-lg flex justify-center items-center h-12 text-sm">
+                            <span>Concluir Cadastro</span>
+                        </button>
+                    </form>
+
+                    <div class="text-center pt-2">
+                        <p class="text-slate-500 text-xs">Já possui uma conta activa? 
+                            <button type="button" id="btn-show-login" class="text-purple-600 font-bold hover:underline ml-1">Iniciar sessão</button>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Formulário de Recuperação de Senha (Esqueci a Senha) -->
+                <div id="forgot-container" class="hidden space-y-6">
+                    <div>
+                        <h3 class="text-2xl font-bold text-slate-900 mb-1">Recuperar Senha</h3>
+                        <p class="text-slate-500 text-sm">Insira o seu e-mail de registo para podermos definir uma nova credencial.</p>
+                    </div>
+
+                    <form id="forgot-form" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">E-mail Registado</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                                    <i class="fa-regular fa-envelope"></i>
+                                </span>
+                                <input type="email" id="forgot-email" required class="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-purple-600 focus:border-transparent outline-none transition-all text-sm" placeholder="exemplo@pricekup.com">
+                            </div>
+                        </div>
+
+                        <div id="new-password-section" class="hidden space-y-4 pt-2 border-t border-slate-100">
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Nova Senha de Acesso</label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                                        <i class="fa-solid fa-lock"></i>
+                                    </span>
+                                    <input type="password" id="forgot-new-password" minlength="6" class="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-purple-600 focus:border-transparent outline-none transition-all text-sm" placeholder="Mínimo 6 caracteres">
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-xl transition-all shadow-lg shadow-purple-100 flex justify-center items-center h-12 text-sm">
+                            <span id="text-forgot-btn">Verificar E-mail</span>
+                        </button>
+                    </form>
+
+                    <div class="text-center pt-2">
+                        <p class="text-slate-500 text-xs">Lembrou-se da sua senha? 
+                            <button type="button" id="btn-forgot-back-login" class="text-purple-600 font-bold hover:underline ml-1">Voltar ao Login</button>
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ==========================================
+         SISTEMA LOGADO (PAINEL GERAL PRICEKUP)
+         ========================================== -->
+    <div id="app-screen" class="hidden min-h-screen flex flex-col md:flex-row">
+        
+        <!-- Barra Lateral Esquerda de Navegação -->
+        <aside class="w-full md:w-64 bg-slate-900 text-white flex flex-col justify-between p-6 shrink-0 border-r border-slate-800">
+            <div>
+                <div class="flex items-center gap-3 mb-10">
+                    <div class="bg-purple-600 p-2 rounded-xl text-white">
+                        <i class="fa-solid fa-chart-line text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-lg leading-none">PriceKup</h1>
+                        <span class="text-[10px] text-purple-400 font-medium">Calcule e Lucre</span>
+                    </div>
+                </div>
+
+                <!-- Abas -->
+                <nav class="space-y-2">
+                    <button onclick="switchTab('tab-home')" id="nav-tab-home" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all bg-purple-600 text-white">
+                        <i class="fa-solid fa-house"></i> Home
+                    </button>
+                    <button onclick="switchTab('tab-produtos')" id="nav-tab-produtos" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all text-slate-400 hover:bg-slate-800 hover:text-slate-200">
+                        <i class="fa-solid fa-cookie-bite"></i> Produtos
+                    </button>
+                    <button onclick="switchTab('tab-ideias')" id="nav-tab-ideias" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all text-slate-400 hover:bg-slate-800 hover:text-slate-200">
+                        <i class="fa-regular fa-lightbulb"></i> Ideias para vender
+                    </button>
+                    <button onclick="switchTab('tab-perfil')" id="nav-tab-perfil" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all text-slate-400 hover:bg-slate-800 hover:text-slate-200">
+                        <i class="fa-regular fa-user"></i> Perfil
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Rodapé da Sidebar -->
+            <div class="mt-8 pt-6 border-t border-slate-800 space-y-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold text-sm">
+                        <i class="fa-solid fa-circle-user text-xl"></i>
+                    </div>
+                    <div>
+                        <p id="user-display-name" class="text-sm font-semibold text-slate-200 truncate max-w-[120px]">Carregando...</p>
+                        <p class="text-[10px] text-slate-500">Membro Ativo</p>
+                    </div>
+                </div>
+                <button id="btn-logout" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold text-red-400 hover:bg-red-500/10 transition-all">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i> Sair do Sistema
+                </button>
+            </div>
+        </aside>
+
+        <!-- Área Principal de Conteúdo -->
+        <main class="flex-1 p-6 md:p-8 overflow-y-auto">
+            
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                <div>
+                    <h2 class="text-2xl md:text-3xl font-bold text-slate-900 flex items-center gap-2">
+                        Olá, <span id="welcome-user-name" class="text-purple-600">Empreendedor</span>! 👋
+                    </h2>
+                    <p class="text-slate-500 text-sm mt-0.5">Bem-vindo ao PriceKup! Acompanhe as suas metas e calcule os seus lucros.</p>
+                </div>
+                <div class="flex items-center gap-3 bg-white px-4 py-2.5 rounded-2xl border border-purple-100 shadow-sm">
+                    <span class="relative flex h-3 w-3">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>
+                    </span>
+                    <span class="text-xs font-medium text-slate-600">Base de Dados PriceKup Conectada</span>
+                </div>
+            </div>
+
+            <!-- ==========================================
+                 CONTEÚDO DA TAB: HOME
+                 ========================================== -->
+            <div id="tab-home" class="space-y-8 tab-content">
+                
+                <!-- Grade de Cartões Financeiros (Visão Geral) -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Lucro do Mês -->
+                    <div class="bg-white p-6 rounded-2xl border border-purple-50/60 shadow-md relative overflow-hidden">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-sm font-semibold text-slate-500">Lucro Estimado</span>
+                            <div class="bg-purple-100 p-2.5 rounded-xl text-purple-600">
+                                <i class="fa-solid fa-wallet text-sm"></i>
+                            </div>
+                        </div>
+                        <h4 id="home-lucro" class="text-2xl font-bold text-slate-950">R$ 0,00</h4>
+                        <p class="text-xs text-green-600 mt-2 font-medium"><i class="fa-solid fa-arrow-up"></i> Atualizado em tempo real</p>
+                    </div>
+
+                    <!-- Faturamento do Mês -->
+                    <div class="bg-white p-6 rounded-2xl border border-purple-50/60 shadow-md relative overflow-hidden">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-sm font-semibold text-slate-500">Faturamento Bruto</span>
+                            <div class="bg-pink-100 p-2.5 rounded-xl text-pink-600">
+                                <i class="fa-solid fa-basket-shopping text-sm"></i>
+                            </div>
+                        </div>
+                        <h4 id="home-faturamento" class="text-2xl font-bold text-slate-950">R$ 0,00</h4>
+                        <p class="text-xs text-slate-400 mt-2">Total de vendas registadas</p>
+                    </div>
+
+                    <!-- Produtos Cadastrados -->
+                    <div class="bg-white p-6 rounded-2xl border border-purple-50/60 shadow-md relative overflow-hidden">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-sm font-semibold text-slate-500">Produtos Ativos</span>
+                            <div class="bg-blue-100 p-2.5 rounded-xl text-blue-600">
+                                <i class="fa-solid fa-box text-sm"></i>
+                            </div>
+                        </div>
+                        <h4 id="home-total-produtos" class="text-2xl font-bold text-slate-950">0</h4>
+                        <p class="text-xs text-slate-400 mt-2">Prontos para precificar</p>
+                    </div>
+
+                    <!-- Meta Financeira -->
+                    <div class="bg-white p-6 rounded-2xl border border-purple-50/60 shadow-md flex items-center justify-between">
+                        <div>
+                            <span class="text-sm font-semibold text-slate-500">Meta Financeira</span>
+                            <h4 id="home-meta" class="text-2xl font-bold text-slate-950 mt-1">R$ 1.500,00</h4>
+                            <div class="mt-2 text-xs font-semibold text-purple-600">Progresso atual</div>
+                        </div>
+                        <div class="relative flex items-center justify-center">
+                            <svg class="w-16 h-16 transform -rotate-90">
+                                <circle cx="32" cy="32" r="28" stroke="#f3e8ff" stroke-width="6" fill="transparent" />
+                                <circle cx="32" cy="32" r="28" stroke="#a855f7" stroke-width="6" fill="transparent" 
+                                        stroke-dasharray="175" id="meta-progress-circle" stroke-dashoffset="175" />
+                            </svg>
+                            <span id="meta-percent-text" class="absolute text-xs font-bold text-purple-700">0%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Painel do Meio: Vendas, Gráficos e Resumos -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    
+                    <!-- Registro de Venda Rápida -->
+                    <div class="bg-white rounded-3xl border border-purple-100 shadow-md p-6 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-4 border-b border-slate-50 pb-4">
+                                <h3 class="font-bold text-lg text-slate-900 flex items-center gap-2">
+                                    <i class="fa-solid fa-cart-plus text-purple-600"></i> Registar Venda Rápida
+                                </h3>
+                            </div>
+
+                            <form id="quick-sale-form" class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 mb-1">Selecione o Produto vendido</label>
+                                    <select id="sale-product-select" required class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-purple-600 focus:border-transparent outline-none transition-all text-sm">
+                                        <!-- Carregado Dinamicamente -->
+                                    </select>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-500 mb-1">Quantidade Vendida</label>
+                                        <input type="number" id="sale-qty" required min="1" value="1" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-purple-600 focus:border-transparent outline-none transition-all text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-500 mb-1">Data da Venda</label>
+                                        <input type="date" id="sale-date" required class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-purple-600 focus:border-transparent outline-none transition-all text-sm">
+                                    </div>
+                                </div>
+                                <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-xl transition-all shadow-md flex justify-center items-center gap-2 text-sm mt-2">
+                                    <i class="fa-solid fa-plus"></i> Confirmar Venda
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Resumo Rápido e Motivacional -->
+                        <div class="mt-6 pt-6 border-t border-slate-100 grid grid-cols-1 gap-2 bg-slate-50 p-4 rounded-2xl text-xs">
+                            <div class="flex items-center justify-between">
+                                <span class="text-slate-400 font-medium">Melhor Produto:</span>
+                                <span id="stats-best-product" class="font-bold text-slate-800">-</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-slate-400 font-medium">Vendas no Mês:</span>
+                                <span id="stats-sales-count" class="font-bold text-slate-800">0 unidades</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-slate-400 font-medium">Falta para a Meta:</span>
+                                <span id="stats-missing-meta" class="font-bold text-purple-700">R$ 1.500,00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- GRÁFICO: Produtos mais vendidos -->
+                    <div class="bg-white rounded-3xl border border-purple-100 shadow-md p-6 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-4 border-b border-slate-50 pb-4">
+                                <h3 class="font-bold text-lg text-slate-900 flex items-center gap-2">
+                                    <i class="fa-solid fa-chart-pie text-purple-600"></i> Produtos mais vendidos
+                                </h3>
+                            </div>
+                            <div class="relative flex items-center justify-center min-h-[180px]">
+                                <canvas id="chart-produtos-vendidos" class="max-h-[180px] max-w-[180px]"></canvas>
+                            </div>
+                        </div>
+                        <p class="text-[10px] text-slate-400 text-center mt-4">Os dados atualizam automaticamente de acordo com as vendas registadas.</p>
+                    </div>
+
+                    <!-- Histórico de Vendas Recentes -->
+                    <div class="bg-white rounded-3xl border border-purple-100 shadow-md p-6 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-4 border-b border-slate-50 pb-4">
+                                <h3 class="font-bold text-lg text-slate-900 flex items-center gap-2">
+                                    <i class="fa-solid fa-receipt text-purple-600"></i> Últimas Vendas
+                                </h3>
+                                <button onclick="clearSalesHistory()" class="text-xs text-red-500 hover:underline font-semibold">Limpar tudo</button>
+                            </div>
+
+                            <div id="sales-history-list" class="space-y-3 max-h-[180px] overflow-y-auto pr-1">
+                                <!-- Inserido dinamicamente -->
+                                <p class="text-slate-400 text-xs text-center py-8">Nenhuma venda registada este mês.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ==========================================
+                 CONTEÚDO DA TAB: PRODUTOS
+                 ========================================== -->
+            <div id="tab-produtos" class="hidden space-y-8 tab-content">
+                
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    
+                    <!-- Lista de Produtos para Seleção -->
+                    <div class="bg-white rounded-3xl border border-purple-100 shadow-md p-6 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-50">
+                                <h3 class="font-bold text-lg text-slate-900">
+                                    <i class="fa-solid fa-utensils text-purple-600 mr-1"></i> Os Meus Produtos
+                                </h3>
+                                <span class="text-xs bg-purple-50 text-purple-600 px-2.5 py-1 rounded-full font-bold" id="badge-prod-count">0 Ativos</span>
+                            </div>
+
+                            <p class="text-xs text-slate-500 mb-4">Escolha um produto para detalhar os ingredientes, gerir outros custos, faturamento ou vendas.</p>
+
+                            <div id="products-list" class="space-y-3 max-h-[350px] overflow-y-auto pr-1">
+                                <!-- Preenchido dinamicamente -->
+                            </div>
+                        </div>
+
+                        <!-- Botão para Criar Novo Produto Vazio -->
+                        <div class="pt-6 border-t border-slate-100 mt-6">
+                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Criar Novo Produto</h4>
+                            <div class="flex gap-2">
+                                <input type="text" id="new-product-name" placeholder="Ex: Brigadeiro Belga" class="flex-1 px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-purple-600 focus:border-transparent outline-none transition-all text-sm">
+                                <button onclick="createNewProduct()" class="bg-purple-600 hover:bg-purple-700 text-white p-3 rounded-xl transition-colors shadow-sm">
+                                    <i class="fa-solid fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Calculadora e Gestor de Custos do Produto Selecionado -->
+                    <div class="lg:col-span-2 bg-white rounded-3xl border border-purple-100 shadow-md p-6">
+                        
+                        <!-- Se nenhum produto estiver selecionado -->
+                        <div id="no-product-selected" class="flex flex-col items-center justify-center py-16 text-center">
+                            <div class="bg-purple-50 text-purple-600 p-5 rounded-full mb-4 text-3xl">
+                                <i class="fa-solid fa-calculator"></i>
+                            </div>
+                            <h4 class="font-bold text-slate-800 text-lg">Nenhum produto selecionado</h4>
+                            <p class="text-slate-500 text-xs max-w-sm mt-1">Clique num produto na barra ao lado para calcular os ingredientes, custos e definir o preço ideal de venda.</p>
+                        </div>
+
+                        <!-- Seção Ativa de Cálculo do Produto -->
+                        <div id="product-detail-section" class="hidden space-y-6">
+                            
+                            <!-- Header do Produto Selecionado -->
+                            <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                                <div>
+                                    <span class="text-[10px] text-purple-600 uppercase tracking-widest font-extrabold">Precificação Detalhada</span>
+                                    <h3 id="detail-product-title" class="text-xl font-bold text-slate-900">-</h3>
+                                </div>
+                                <button onclick="deleteCurrentProduct()" class="text-xs text-red-500 hover:text-red-600 hover:underline font-semibold">
+                                    <i class="fa-regular fa-trash-can mr-1"></i> Apagar Produto
+                                </button>
+                            </div>
+
+                            <!-- Navegação de Sub-Abas do Cálculo -->
+                            <div class="flex border-b border-slate-100 text-sm overflow-x-auto">
+                                <button onclick="switchSubTab('subtab-ing')" id="nav-subtab-ing" class="px-4 py-2 font-bold text-purple-600 border-b-2 border-purple-600 shrink-0">
+                                    Ingredientes & Custos
+                                </button>
+                                <button onclick="switchSubTab('subtab-pre')" id="nav-subtab-pre" class="px-4 py-2 font-semibold text-slate-400 hover:text-slate-600 shrink-0">
+                                    Definição do Preço de Venda
+                                </button>
+                                <button onclick="switchSubTab('subtab-ven')" id="nav-subtab-ven" class="px-4 py-2 font-semibold text-slate-400 hover:text-slate-600 shrink-0">
+                                    Vendas do Produto
+                                </button>
+                            </div>
+
+                            <!-- SUB-TAB 1: Ingredientes & Custos -->
+                            <div id="subtab-ing" class="space-y-6">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <p class="text-xs text-slate-500">Adicione todos os componentes gastos na produção (gasto direto ou custos operacionais).</p>
+                                    <div class="flex gap-2">
+                                        <button onclick="toggleIngredientModal(true)" class="bg-purple-100 hover:bg-purple-200 text-purple-700 font-bold px-3 py-2 rounded-xl text-xs transition-colors">
+                                            + Ingrediente
+                                        </button>
+                                        <button onclick="toggleOtherCostModal(true)" class="bg-pink-100 hover:bg-pink-200 text-pink-700 font-bold px-3 py-2 rounded-xl text-xs transition-colors">
+                                            + Outro Custo
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Tabela de Ingredientes e Custos Adicionados -->
+                                <div class="overflow-x-auto border border-slate-100 rounded-2xl">
+                                    <table class="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr class="bg-slate-50 text-slate-500 text-[10px] uppercase font-bold tracking-wider border-b border-slate-100">
+                                                <th class="p-4">Tipo</th>
+                                                <th class="p-4">Nome do Custo / Item</th>
+                                                <th class="p-4 text-right">Custo Direto Proporcional</th>
+                                                <th class="p-4 text-center">Ação</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="ingredients-table-body" class="divide-y divide-slate-100 text-xs">
+                                            <!-- Preenchido dinamicamente -->
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Totalizador dos Custos de Matéria-Prima e Outros -->
+                                <div class="bg-purple-50 rounded-2xl p-5 flex items-center justify-between border border-purple-100/50">
+                                    <div>
+                                        <p class="text-xs text-purple-800 font-semibold uppercase tracking-wider">Custo Total do Produto</p>
+                                        <p class="text-sm text-slate-500 mt-1">Soma de ingredientes e taxas operacionais</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <span id="detail-total-custo-ingredientes" class="text-2xl font-black text-purple-700">R$ 0,00</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- SUB-TAB 2: Definição do Preço de Venda -->
+                            <div id="subtab-pre" class="hidden space-y-6">
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    
+                                    <!-- Inputs de Configuração de Lucro -->
+                                    <div class="space-y-4 bg-slate-50 p-5 rounded-2xl border border-slate-100">
+                                        <h4 class="font-bold text-sm text-slate-800">Parâmetros de Produção</h4>
+                                        
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-500 mb-1">Rendimento (Quantos rende por receita?)</label>
+                                            <input type="number" id="pricing-yield" min="1" oninput="calculatePricing()" class="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 focus:bg-white focus:ring-2 focus:ring-purple-600 focus:border-transparent outline-none transition-all text-sm">
+                                            <p class="text-[10px] text-slate-400 mt-1">Ex: se a receita rende 25 brigadeiros, coloque 25.</p>
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-500 mb-1">Margem de Lucro Desejada (%)</label>
+                                            <input type="number" id="pricing-margin" min="1" oninput="calculatePricing()" class="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 focus:bg-white focus:ring-2 focus:ring-purple-600 focus:border-transparent outline-none transition-all text-sm">
+                                            <p class="text-[10px] text-slate-400 mt-1">Sugerido: no mínimo 100% para cobrir mão-de-obra e taxas.</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Resultados de Sugestão de Preços -->
+                                    <div class="space-y-4 flex flex-col justify-between">
+                                        <div class="bg-purple-50 rounded-2xl p-5 border border-purple-100">
+                                            <p class="text-xs text-purple-800 font-bold uppercase tracking-wider mb-2">Preço Sugerido por Unidade</p>
+                                            <p id="suggested-price-unit" class="text-3xl font-black text-purple-700">R$ 0,00</p>
+                                            <p class="text-[10px] text-purple-500 mt-1">Custo unitário: <span id="unit-cost-label" class="font-bold">R$ 0,00</span></p>
+                                        </div>
+
+                                        <div class="bg-green-50 rounded-2xl p-5 border border-green-100">
+                                            <p class="text-xs text-green-800 font-bold uppercase tracking-wider mb-2">Lucro Líquido Unitário</p>
+                                            <p id="suggested-profit-unit" class="text-2xl font-black text-green-700">R$ 0,00</p>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <!-- Definição Oficial de Preço para Vendas -->
+                                <div class="pt-4 border-t border-slate-100 flex items-center justify-between gap-4">
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-700">Preço Oficial Praticado de Venda (R$)</label>
+                                        <p class="text-[10px] text-slate-500">Este será o valor usado nos registos de vendas.</p>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <input type="number" step="0.01" id="official-price-input" class="w-28 px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-purple-600 focus:border-transparent outline-none transition-all text-sm font-extrabold text-slate-900">
+                                        <button onclick="saveOfficialPrice()" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-4 py-2.5 rounded-xl text-xs transition-colors">
+                                            Guardar Preço
+                                        </button>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <!-- SUB-TAB 3: Vendas do Produto (Hoje, Ontem, Este Mês) -->
+                            <div id="subtab-ven" class="hidden space-y-6">
+                                <h4 class="font-bold text-sm text-slate-800">Relatório Detalhado de Saídas</h4>
+                                <p class="text-xs text-slate-500">Acompanhe as vendas faturadas e a margem de lucro acumulada deste produto.</p>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <!-- Hoje -->
+                                    <div class="bg-slate-50 border border-slate-100 rounded-2xl p-5">
+                                        <div class="flex justify-between items-center mb-3">
+                                            <span class="text-xs font-bold text-slate-400 uppercase">Hoje</span>
+                                            <span id="vendas-hoje-unidades" class="bg-purple-100 text-purple-700 text-xs font-bold px-2 py-0.5 rounded-full">0 un.</span>
+                                        </div>
+                                        <div class="space-y-2 mt-2 text-xs">
+                                            <div class="flex justify-between text-slate-600"><span>Faturamento:</span> <strong id="vendas-hoje-faturamento">R$ 0,00</strong></div>
+                                            <div class="flex justify-between text-slate-600"><span>Custo Prod:</span> <strong id="vendas-hoje-custo">R$ 0,00</strong></div>
+                                            <div class="flex justify-between text-green-600"><span>Lucro Líquido:</span> <strong id="vendas-hoje-lucro">R$ 0,00</strong></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Ontem -->
+                                    <div class="bg-slate-50 border border-slate-100 rounded-2xl p-5">
+                                        <div class="flex justify-between items-center mb-3">
+                                            <span class="text-xs font-bold text-slate-400 uppercase">Ontem</span>
+                                            <span id="vendas-ontem-unidades" class="bg-purple-100 text-purple-700 text-xs font-bold px-2 py-0.5 rounded-full">0 un.</span>
+                                        </div>
+                                        <div class="space-y-2 mt-2 text-xs">
+                                            <div class="flex justify-between text-slate-600"><span>Faturamento:</span> <strong id="vendas-ontem-faturamento">R$ 0,00</strong></div>
+                                            <div class="flex justify-between text-slate-600"><span>Custo Prod:</span> <strong id="vendas-ontem-custo">R$ 0,00</strong></div>
+                                            <div class="flex justify-between text-green-600"><span>Lucro Líquido:</span> <strong id="vendas-ontem-lucro">R$ 0,00</strong></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Este Mês -->
+                                    <div class="bg-purple-50/50 border border-purple-100 rounded-2xl p-5">
+                                        <div class="flex justify-between items-center mb-3">
+                                            <span class="text-xs font-bold text-purple-500 uppercase">Este Mês</span>
+                                            <span id="vendas-mes-unidades" class="bg-purple-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">0 un.</span>
+                                        </div>
+                                        <div class="space-y-2 mt-2 text-xs">
+                                            <div class="flex justify-between text-slate-600"><span>Faturamento:</span> <strong id="vendas-mes-faturamento">R$ 0,00</strong></div>
+                                            <div class="flex justify-between text-slate-600"><span>Custo Prod:</span> <strong id="vendas-mes-custo">R$ 0,00</strong></div>
+                                            <div class="flex justify-between text-purple-700"><span>Lucro Líquido:</span> <strong id="vendas-mes-lucro">R$ 0,00</strong></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ==========================================
+                 CONTEÚDO DA TAB: IDEIAS
+                 ========================================== -->
+            <div id="tab-ideias" class="hidden space-y-8 tab-content">
+                <div class="bg-white rounded-3xl border border-purple-100 shadow-md p-6 md:p-8">
+                    <div class="flex items-center gap-3 border-b border-slate-50 pb-4 mb-6">
+                        <div class="bg-purple-100 text-purple-600 p-3 rounded-2xl">
+                            <i class="fa-regular fa-lightbulb text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg text-slate-900">Ideias de Produtos Lucrativos</h3>
+                            <p class="text-slate-500 text-xs">Veja os produtos mais recomendados para começar a produzir e vender rápido.</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        
+                        <!-- Brigadeiro Gourmet -->
+                        <div class="border border-slate-100 rounded-2xl p-5 hover:border-purple-200 transition-all bg-slate-50/50 flex flex-col justify-between h-full">
+                            <div>
+                                <span class="text-xs font-bold text-purple-600 bg-purple-50 px-2.5 py-1 rounded-full">🍫 Doce</span>
+                                <h4 class="font-bold text-slate-800 text-base mt-3 mb-1">Brigadeiro Gourmet</h4>
+                                <div class="text-[11px] text-slate-600 space-y-1 my-3">
+                                    <p><strong>Inv. Inicial:</strong> R$ 50 a R$ 100</p>
+                                    <p><strong>Preço de Venda:</strong> R$ 2,00 a R$ 4,00 /un.</p>
+                                    <p><strong>Lucro Estimado:</strong> Médio a Alto</p>
+                                    <p><strong>Público:</strong> Festas, escritórios e encomendas.</p>
+                                </div>
+                            </div>
+                            <p class="text-[10px] italic text-slate-400 border-t border-slate-100 pt-2 mt-2">Dica: Sabores gourmet costumam ter maior valor agregado.</p>
+                        </div>
+
+                        <!-- Bolo de Pote -->
+                        <div class="border border-slate-100 rounded-2xl p-5 hover:border-purple-200 transition-all bg-slate-50/50 flex flex-col justify-between h-full">
+                            <div>
+                                <span class="text-xs font-bold text-pink-600 bg-pink-50 px-2.5 py-1 rounded-full">🍰 Bolo</span>
+                                <h4 class="font-bold text-slate-800 text-base mt-3 mb-1">Bolo de Pote</h4>
+                                <div class="text-[11px] text-slate-600 space-y-1 my-3">
+                                    <p><strong>Inv. Inicial:</strong> R$ 80 a R$ 150</p>
+                                    <p><strong>Preço de Venda:</strong> R$ 8,00 a R$ 15,00</p>
+                                    <p><strong>Lucro Estimado:</strong> Alto</p>
+                                    <p><strong>Público:</strong> Estudantes, escritórios e encomendas.</p>
+                                </div>
+                            </div>
+                            <p class="text-[10px] italic text-slate-400 border-t border-slate-100 pt-2 mt-2">Dica: Sabores como Ninho com Nutella e Chocolate têm grande procura.</p>
+                        </div>
+
+                        <!-- Brownie -->
+                        <div class="border border-slate-100 rounded-2xl p-5 hover:border-purple-200 transition-all bg-slate-50/50 flex flex-col justify-between h-full">
+                            <div>
+                                <span class="text-xs font-bold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full">🍪 Forno</span>
+                                <h4 class="font-bold text-slate-800 text-base mt-3 mb-1">Brownie</h4>
+                                <div class="text-[11px] text-slate-600 space-y-1 my-3">
+                                    <p><strong>Inv. Inicial:</strong> R$ 60 a R$ 120</p>
+                                    <p><strong>Preço de Venda:</strong> R$ 5,00 a R$ 10,00</p>
+                                    <p><strong>Lucro Estimado:</strong> Alto</p>
+                                    <p><strong>Público:</strong> Escolas, faculdades e empresas.</p>
+                                </div>
+                            </div>
+                            <p class="text-[10px] italic text-slate-400 border-t border-slate-100 pt-2 mt-2">Dica: Corte pedaços padronizados e coloque uma embalagem bem selada.</p>
+                        </div>
+
+                        <!-- Trufas Artesanais -->
+                        <div class="border border-slate-100 rounded-2xl p-5 hover:border-purple-200 transition-all bg-slate-50/50 flex flex-col justify-between h-full">
+                            <div>
+                                <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">🍫 Bombom</span>
+                                <h4 class="font-bold text-slate-800 text-base mt-3 mb-1">Trufas Artesanais</h4>
+                                <div class="text-[11px] text-slate-600 space-y-1 my-3">
+                                    <p><strong>Inv. Inicial:</strong> R$ 50 a R$ 100</p>
+                                    <p><strong>Preço de Venda:</strong> R$ 3,00 a R$ 8,00</p>
+                                    <p><strong>Lucro Estimado:</strong> Alto</p>
+                                    <p><strong>Público:</strong> Presentes, eventos e vendas rápidas.</p>
+                                </div>
+                            </div>
+                            <p class="text-[10px] italic text-slate-400 border-t border-slate-100 pt-2 mt-2">Dica: Ofereça embalagens para presente nos dias festivos.</p>
+                        </div>
+
+                        <!-- Marmitas -->
+                        <div class="border border-slate-100 rounded-2xl p-5 hover:border-purple-200 transition-all bg-slate-50/50 flex flex-col justify-between h-full">
+                            <div>
+                                <span class="text-xs font-bold text-green-600 bg-green-50 px-2.5 py-1 rounded-full">🍱 Salgado</span>
+                                <h4 class="font-bold text-slate-800 text-base mt-3 mb-1">Marmitas</h4>
+                                <div class="text-[11px] text-slate-600 space-y-1 my-3">
+                                    <p><strong>Inv. Inicial:</strong> R$ 150 a R$ 400</p>
+                                    <p><strong>Preço de Venda:</strong> R$ 15,00 a R$ 30,00</p>
+                                    <p><strong>Lucro Estimado:</strong> Alto</p>
+                                    <p><strong>Público:</strong> Trabalhadores, estudantes e empresas.</p>
+                                </div>
+                            </div>
+                            <p class="text-[10px] italic text-slate-400 border-t border-slate-100 pt-2 mt-2">Dica: Foque no custo-benefício e na entrega programada.</p>
+                        </div>
+
+                        <!-- Salgados para Festa -->
+                        <div class="border border-slate-100 rounded-2xl p-5 hover:border-purple-200 transition-all bg-slate-50/50 flex flex-col justify-between h-full">
+                            <div>
+                                <span class="text-xs font-bold text-red-600 bg-red-50 px-2.5 py-1 rounded-full">🥟 Fritos</span>
+                                <h4 class="font-bold text-slate-800 text-base mt-3 mb-1">Salgados para Festa</h4>
+                                <div class="text-[11px] text-slate-600 space-y-1 my-3">
+                                    <p><strong>Inv. Inicial:</strong> R$ 100 a R$ 300</p>
+                                    <p><strong>Preço de Venda:</strong> R$ 1,50 a R$ 3,50 /un.</p>
+                                    <p><strong>Lucro Estimado:</strong> Alto</p>
+                                    <p><strong>Público:</strong> Festas e eventos.</p>
+                                </div>
+                            </div>
+                            <p class="text-[10px] italic text-slate-400 border-t border-slate-100 pt-2 mt-2">Dica: Ofereça opções congeladas para maior praticidade.</p>
+                        </div>
+
+                        <!-- Cupcakes -->
+                        <div class="border border-slate-100 rounded-2xl p-5 hover:border-purple-200 transition-all bg-slate-50/50 flex flex-col justify-between h-full">
+                            <div>
+                                <span class="text-xs font-bold text-purple-600 bg-purple-50 px-2.5 py-1 rounded-full">🧁 Minibolo</span>
+                                <h4 class="font-bold text-slate-800 text-base mt-3 mb-1">Cupcakes</h4>
+                                <div class="text-[11px] text-slate-600 space-y-1 my-3">
+                                    <p><strong>Inv. Inicial:</strong> R$ 80 a R$ 150</p>
+                                    <p><strong>Preço de Venda:</strong> R$ 6,00 a R$ 12,00</p>
+                                    <p><strong>Lucro Estimado:</strong> Médio a Alto</p>
+                                    <p><strong>Público:</strong> Festas, cafeterias e encomendas.</p>
+                                </div>
+                            </div>
+                            <p class="text-[10px] italic text-slate-400 border-t border-slate-100 pt-2 mt-2">Dica: Invista em designs divertidos de pasta americana.</p>
+                        </div>
+
+                        <!-- Pudim Individual -->
+                        <div class="border border-slate-100 rounded-2xl p-5 hover:border-purple-200 transition-all bg-slate-50/50 flex flex-col justify-between h-full">
+                            <div>
+                                <span class="text-xs font-bold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full">🍮 Sobremesa</span>
+                                <h4 class="font-bold text-slate-800 text-base mt-3 mb-1">Pudim Individual</h4>
+                                <div class="text-[11px] text-slate-600 space-y-1 my-3">
+                                    <p><strong>Inv. Inicial:</strong> R$ 50 a R$ 120</p>
+                                    <p><strong>Preço de Venda:</strong> R$ 6,00 a R$ 12,00</p>
+                                    <p><strong>Lucro Estimado:</strong> Médio</p>
+                                    <p><strong>Público:</strong> Entregas rápidas de sobremesa.</p>
+                                </div>
+                            </div>
+                            <p class="text-[10px] italic text-slate-400 border-t border-slate-100 pt-2 mt-2">Dica: Calda dourada brilhante atrai olhares e gera encomendas.</p>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- ==========================================
+                 CONTEÚDO DA TAB: PERFIL
+                 ========================================== -->
+            <div id="tab-perfil" class="hidden space-y-8 tab-content">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    
+                    <!-- Resumo Geral do Perfil -->
+                    <div class="bg-white rounded-3xl border border-purple-100 shadow-md p-6 text-center">
+                        <div class="w-24 h-24 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 text-white flex items-center justify-center mx-auto mb-4 font-bold text-3xl shadow-lg">
+                            <i class="fa-solid fa-cookie-bite"></i>
+                        </div>
+                        <h3 id="profile-display-name" class="font-bold text-lg text-slate-900">-</h3>
+                        <p id="profile-display-email" class="text-slate-500 text-xs">-</p>
+                        
+                        <div class="mt-6 pt-6 border-t border-slate-100 grid grid-cols-2 gap-2 text-left">
+                            <div class="bg-slate-50 p-3 rounded-xl">
+                                <span class="text-[10px] text-slate-400 font-bold uppercase block">Membro Desde</span>
+                                <span class="text-xs font-bold text-slate-700">Junho, 2026</span>
+                            </div>
+                            <div class="bg-slate-50 p-3 rounded-xl">
+                                <span class="text-[10px] text-slate-400 font-bold uppercase block">Tipo de Conta</span>
+                                <span class="text-xs font-bold text-purple-600">Premium Grátis</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Definição da Meta Financeira e Zona de Perigo -->
+                    <div class="lg:col-span-2 space-y-6">
+                        <div class="bg-white rounded-3xl border border-purple-100 shadow-md p-6">
+                            <h3 class="font-bold text-lg text-slate-900 mb-2">Definições do Negócio</h3>
+                            <p class="text-slate-500 text-xs mb-6">Ajuste os objetivos financeiros para guiar a sua caminhada no PriceKup.</p>
+
+                            <form id="settings-form" class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 mb-1">Nome do Empreendedor</label>
+                                    <input type="text" id="setting-name" required class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-purple-600 focus:border-transparent outline-none transition-all text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 mb-1">Sua Meta Mensal de Lucro (R$)</label>
+                                    <input type="number" id="setting-meta" required min="1" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-purple-600 focus:border-transparent outline-none transition-all text-sm">
+                                    <p class="text-[10px] text-slate-400 mt-1">Isso atualizará o indicador visual de progresso na página principal.</p>
+                                </div>
+                                <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-3 rounded-xl text-sm transition-all shadow-md">
+                                    Guardar Alterações
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- ZONA DE PERIGO: Limpar Base de Dados -->
+                        <div class="bg-white rounded-3xl border border-rose-100 shadow-md p-6">
+                            <h3 class="font-bold text-lg text-rose-600 mb-2 flex items-center gap-2">
+                                <i class="fa-solid fa-triangle-exclamation"></i> Zona de Perigo
+                            </h3>
+                            <p class="text-slate-500 text-xs mb-4">Se precisar de começar do zero, pode redefinir toda a sua base de dados do PriceKup.</p>
+                            <div class="bg-rose-50 border border-rose-100 rounded-2xl p-4 mb-4">
+                                <p class="text-rose-700 text-xs leading-relaxed font-semibold">
+                                    Aviso: Ao clicar no botão abaixo, irá eliminar de forma permanente todos os seus produtos criados, custos, ingredientes e o seu histórico de faturamento e vendas. Esta ação não pode ser desfeita.
+                                </p>
+                            </div>
+                            <button onclick="clearFullDatabase()" class="bg-rose-600 hover:bg-rose-700 text-white font-semibold px-6 py-3 rounded-xl text-sm transition-all shadow-md">
+                                Limpar Todos os Dados do Sistema
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- ==========================================
+         MODAL: ADICIONAR INGREDIENTE
+         ========================================== -->
+    <div id="ingredient-modal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl border border-purple-50 fade-in">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h4 class="font-bold text-slate-900 text-base">Novo Ingrediente</h4>
+                <button onclick="toggleIngredientModal(false)" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <form id="ingredient-form" class="space-y-4 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Nome do ingrediente</label>
+                    <input type="text" id="ing-name" placeholder="Ex: Chocolate em pó" required class="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-purple-600 focus:border-transparent outline-none transition-all">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Custo Direto na Receita (R$)</label>
+                    <input type="number" step="0.01" id="ing-package-cost" placeholder="Ex: 4.50" required min="0.01" class="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-purple-600 focus:border-transparent outline-none transition-all">
+                </div>
+
+                <div class="pt-3 border-t border-slate-100 flex gap-2">
+                    <button type="button" onclick="toggleIngredientModal(false)" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-xl transition-colors">Cancelar</button>
+                    <button type="submit" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5 rounded-xl transition-colors">Adicionar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         MODAL: ADICIONAR OUTROS CUSTOS
+         ========================================== -->
+    <div id="other-cost-modal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl border border-purple-50 fade-in">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h4 class="font-bold text-slate-900 text-base">Adicionar Outro Custo</h4>
+                <button onclick="toggleOtherCostModal(false)" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <form id="other-cost-form" class="space-y-4 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Nome do custo</label>
+                    <input type="text" id="cost-name" placeholder="Ex: Caixa de Embalagem, Gás" required class="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-purple-600 focus:border-transparent outline-none transition-all">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Preço (R$)</label>
+                    <input type="number" step="0.01" id="cost-price" placeholder="Ex: 1.50" required min="0.01" class="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-purple-600 focus:border-transparent outline-none transition-all">
+                </div>
+
+                <div class="pt-3 border-t border-slate-100 flex gap-2">
+                    <button type="button" onclick="toggleOtherCostModal(false)" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-xl transition-colors">Cancelar</button>
+                    <button type="submit" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5 rounded-xl transition-colors">Adicionar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- Rodapé Fixo -->
+    <footer class="bg-slate-900 border-t border-slate-800 py-3 text-center text-[11px] text-slate-400 tracking-wider">
+        PriceKup - Organização e Precificação Simples e Inteligente para o seu Negócio 🚀
+    </footer>
+
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, getDocs, addDoc, updateDoc, doc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Elementos Úteis
+        const initLoading = document.getElementById('init-loading');
+        const authScreen = document.getElementById('auth-screen');
+        const appScreen = document.getElementById('app-screen');
+        const notification = document.getElementById('notification');
+
+        // Alternar Visualizações
+        document.getElementById('btn-show-register').addEventListener('click', () => {
+            document.getElementById('login-container').classList.add('hidden');
+            document.getElementById('forgot-container').classList.add('hidden');
+            document.getElementById('register-container').classList.remove('hidden');
+            document.getElementById('register-container').classList.add('fade-in');
+        });
+        document.getElementById('btn-show-login').addEventListener('click', () => {
+            document.getElementById('register-container').classList.add('hidden');
+            document.getElementById('forgot-container').classList.add('hidden');
+            document.getElementById('login-container').classList.remove('hidden');
+            document.getElementById('login-container').classList.add('fade-in');
+        });
+
+        // Configurações do Banco de Dados
+        let db;
+        let isDbReady = false;
+        let currentUser = null;
+        let currentAppId = 'default-app-id';
+        
+        const USERS_COLLECTION = 'demo_users';
+        const PRODUCTS_COLLECTION = 'products';
+        const SALES_COLLECTION = 'sales';
+
+        // Gráfico do ChartJS
+        let salesChart = null;
+
+        // Base de dados local em memória (Cópia / Fallback se o Firebase não responder)
+        let memoryUsers = [
+            { email: 'teste@pricekup.com', password: '123456', name: 'Confeitaria da Maria', meta: 1500 }
+        ];
+        let memoryProducts = [
+            {
+                id: 'prod-brigadeiro',
+                name: 'Brigadeiro Gourmet',
+                yield: 25,
+                margin: 100,
+                price: 2.25,
+                ingredients: [
+                    { name: 'Leite condensado', cost: 4.50, type: 'ingrediente' },
+                    { name: 'Chocolate em pó', cost: 2.80, type: 'ingrediente' },
+                    { name: 'Manteiga', cost: 1.50, type: 'ingrediente' },
+                    { name: 'Granulado', cost: 1.20, type: 'ingrediente' },
+                    { name: 'Forminha unitária', cost: 0.70, type: 'outro' },
+                    { name: 'Gás/Energia', cost: 0.60, type: 'outro' }
+                ]
+            },
+            {
+                id: 'prod-bolo-pote',
+                name: 'Bolo de Pote',
+                yield: 10,
+                margin: 120,
+                price: 8.00,
+                ingredients: [
+                    { name: 'Massa Pronta', cost: 6.50, type: 'ingrediente' },
+                    { name: 'Recheio de Chocolate', cost: 8.00, type: 'ingrediente' },
+                    { name: 'Potes plásticos', cost: 4.80, type: 'outro' }
+                ]
+            }
+        ];
+        let memorySales = [
+            { id: 'sale-1', productName: 'Brigadeiro Gourmet', price: 2.25, qty: 80, date: '2026-06-07' }, // Hoje
+            { id: 'sale-2', productName: 'Bolo de Pote', price: 8.00, qty: 30, date: '2026-06-06' }, // Ontem
+            { id: 'sale-3', productName: 'Brigadeiro Gourmet', price: 2.25, qty: 40, date: '2026-06-06' }  // Ontem
+        ];
+
+        let selectedProduct = null;
+
+        // Mostrar Alerta Bonito
+        function showAlert(msg, type = 'success') {
+            notification.textContent = msg;
+            notification.className = `fixed top-5 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-2xl shadow-xl z-50 text-white font-medium text-sm fade-in ${type === 'success' ? 'bg-purple-600' : 'bg-rose-500'}`;
+            notification.classList.remove('hidden');
+            setTimeout(() => {
+                notification.classList.add('hidden');
+            }, 3000);
+        }
+
+        // 1. Conexão ao Banco de Dados (Firebase)
+        async function connectToDatabase() {
+            try {
+                if (typeof __firebase_config !== 'undefined') {
+                    const firebaseConfig = JSON.parse(__firebase_config);
+                    const app = initializeApp(firebaseConfig);
+                    const auth = getAuth(app);
+                    db = getFirestore(app);
+                    currentAppId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+
+                    onAuthStateChanged(auth, (user) => {
+                        isDbReady = true;
+                        initLoading.classList.add('hidden');
+                    });
+                } else {
+                    throw new Error("Ambiente sem Firebase.");
+                }
+            } catch (error) {
+                console.warn("Utilizando Base de Dados Local Temporária (Modo Fallback Offline).", error);
+                isDbReady = true;
+                initLoading.classList.add('hidden');
+            }
+        }
+
+        connectToDatabase();
+
+        // 2. Lógica de Cadastro de Utilizador
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('reg-name').value.trim();
+            const email = document.getElementById('reg-email').value.trim().toLowerCase();
+            const password = document.getElementById('reg-password').value;
+
+            try {
+                if (db) {
+                    const usersRef = collection(db, 'artifacts', currentAppId, 'public', 'data', USERS_COLLECTION);
+                    const snapshot = await getDocs(usersRef);
+                    const list = snapshot.docs.map(doc => doc.data());
+
+                    if (list.some(u => u.email === email)) {
+                        return showAlert('Este e-mail já está em uso!', 'error');
+                    }
+
+                    await addDoc(usersRef, {
+                        name, email, password, meta: 1500, createdAt: new Date().toISOString()
+                    });
+                } else {
+                    if (memoryUsers.some(u => u.email === email)) {
+                        return showAlert('Este e-mail já está em uso!', 'error');
+                    }
+                    memoryUsers.push({ name, email, password, meta: 1500 });
+                }
+
+                showAlert('Parabéns! Sua conta PriceKup foi criada.', 'success');
+                document.getElementById('register-form').reset();
+                document.getElementById('btn-show-login').click();
+            } catch (error) {
+                showAlert('Erro ao registar conta.', 'error');
+            }
+        });
+
+        // 3. Lógica de Login
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value.trim().toLowerCase();
+            const password = document.getElementById('login-password').value;
+
+            try {
+                let found = null;
+                if (db) {
+                    const usersRef = collection(db, 'artifacts', currentAppId, 'public', 'data', USERS_COLLECTION);
+                    const snapshot = await getDocs(usersRef);
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        if (data.email === email && data.password === password) {
+                            found = { ...data, id: doc.id };
+                        }
+                    });
+                } else {
+                    found = memoryUsers.find(u => u.email === email && u.password === password);
+                }
+
+                if (found) {
+                    currentUser = found;
+                    loginToApp();
+                } else {
+                    showAlert('Dados incorretos. Tente novamente.', 'error');
+                }
+            } catch (error) {
+                showAlert('Erro na ligação ao banco.', 'error');
+            }
+        });
+
+        // Lógica de Esqueci a Senha
+        let forgotUser = null;
+
+        document.getElementById('btn-show-forgot').addEventListener('click', () => {
+            document.getElementById('login-container').classList.add('hidden');
+            document.getElementById('forgot-container').classList.remove('hidden');
+            document.getElementById('forgot-container').classList.add('fade-in');
+            
+            forgotUser = null;
+            document.getElementById('new-password-section').classList.add('hidden');
+            document.getElementById('forgot-new-password').required = false;
+            document.getElementById('forgot-email').disabled = false;
+            document.getElementById('text-forgot-btn').textContent = 'Verificar E-mail';
+            document.getElementById('forgot-form').reset();
+        });
+
+        document.getElementById('btn-forgot-back-login').addEventListener('click', () => {
+            document.getElementById('forgot-container').classList.add('hidden');
+            document.getElementById('login-container').classList.remove('hidden');
+            document.getElementById('login-container').classList.add('fade-in');
+        });
+
+        document.getElementById('forgot-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('forgot-email').value.trim().toLowerCase();
+
+            if (!forgotUser) {
+                try {
+                    let found = null;
+                    if (db) {
+                        const usersRef = collection(db, 'artifacts', currentAppId, 'public', 'data', USERS_COLLECTION);
+                        const snapshot = await getDocs(usersRef);
+                        snapshot.forEach(doc => {
+                            const data = doc.data();
+                            if (data.email === email) {
+                                found = { ...data, id: doc.id };
+                            }
+                        });
+                    } else {
+                        found = memoryUsers.find(u => u.email === email);
+                    }
+
+                    if (found) {
+                        forgotUser = found;
+                        showAlert('E-mail verificado! Digite a sua nova senha.', 'success');
+                        
+                        document.getElementById('new-password-section').classList.remove('hidden');
+                        document.getElementById('new-password-section').classList.add('fade-in');
+                        document.getElementById('forgot-new-password').required = true;
+                        document.getElementById('forgot-email').disabled = true;
+                        document.getElementById('text-forgot-btn').textContent = 'Confirmar Nova Senha';
+                    } else {
+                        showAlert('E-mail não registado.', 'error');
+                    }
+                } catch (error) {
+                    showAlert('Erro ao procurar dados.', 'error');
+                }
+            } else {
+                const newPassword = document.getElementById('forgot-new-password').value;
+                if (newPassword.length < 6) {
+                    return showAlert('A senha deve ter no mínimo 6 caracteres.', 'error');
+                }
+
+                try {
+                    if (db && forgotUser.id) {
+                        const uRef = doc(db, 'artifacts', currentAppId, 'public', 'data', USERS_COLLECTION, forgotUser.id);
+                        await updateDoc(uRef, { password: newPassword });
+                    } else {
+                        const index = memoryUsers.findIndex(u => u.email === forgotUser.email);
+                        if (index !== -1) {
+                            memoryUsers[index].password = newPassword;
+                        }
+                    }
+
+                    showAlert('Senha alterada com sucesso! Faça login.', 'success');
+                    document.getElementById('btn-forgot-back-login').click();
+                } catch (error) {
+                    showAlert('Erro ao redefinir a senha.', 'error');
+                }
+            }
+        });
+
+        // Iniciar Sessão no Dashboard
+        async function loginToApp() {
+            authScreen.classList.add('hidden');
+            appScreen.classList.remove('hidden');
+            appScreen.classList.add('fade-in');
+
+            document.getElementById('user-display-name').textContent = currentUser.name;
+            document.getElementById('welcome-user-name').textContent = currentUser.name;
+            
+            document.getElementById('profile-display-name').textContent = currentUser.name;
+            document.getElementById('profile-display-email').textContent = currentUser.email;
+            document.getElementById('setting-name').value = currentUser.name;
+            document.getElementById('setting-meta').value = currentUser.meta;
+
+            showAlert(`Bem-vindo, ${currentUser.name}!`, 'success');
+
+            await syncAppData();
+        }
+
+        async function syncAppData() {
+            if (db) {
+                try {
+                    const prodRef = collection(db, 'artifacts', currentAppId, 'public', 'data', PRODUCTS_COLLECTION);
+                    const prodSnap = await getDocs(prodRef);
+                    memoryProducts = prodSnap.docs.map(d => ({ ...d.data(), id: d.id }));
+
+                    const salesRef = collection(db, 'artifacts', currentAppId, 'public', 'data', SALES_COLLECTION);
+                    const salesSnap = await getDocs(salesRef);
+                    memorySales = salesSnap.docs.map(d => ({ ...d.data(), id: d.id }));
+                } catch (e) {
+                    console.error("Falha ao sincronizar dados remotos. Usando offline.", e);
+                }
+            }
+
+            renderAll();
+        }
+
+        document.getElementById('btn-logout').addEventListener('click', () => {
+            currentUser = null;
+            appScreen.classList.add('hidden');
+            authScreen.classList.remove('hidden');
+            authScreen.classList.add('fade-in');
+            showAlert('Sessão encerrada.', 'success');
+        });
+
+        window.switchTab = function(tabId) {
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.add('hidden'));
+            document.getElementById(tabId).classList.remove('hidden');
+            document.getElementById(tabId).classList.add('fade-in');
+
+            const buttons = document.querySelectorAll('aside nav button');
+            buttons.forEach(btn => {
+                btn.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all text-slate-400 hover:bg-slate-800 hover:text-slate-200";
+            });
+            document.getElementById(`nav-${tabId}`).className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all bg-purple-600 text-white";
+        };
+
+        window.switchSubTab = function(subtabId) {
+            document.getElementById('subtab-ing').classList.add('hidden');
+            document.getElementById('subtab-pre').classList.add('hidden');
+            document.getElementById('subtab-ven').classList.add('hidden');
+            document.getElementById(subtabId).classList.remove('hidden');
+            document.getElementById(subtabId).classList.add('fade-in');
+
+            const btnIng = document.getElementById('nav-subtab-ing');
+            const btnPre = document.getElementById('nav-subtab-pre');
+            const btnVen = document.getElementById('nav-subtab-ven');
+
+            btnIng.className = "px-4 py-2 font-semibold text-slate-400 hover:text-slate-600 shrink-0";
+            btnPre.className = "px-4 py-2 font-semibold text-slate-400 hover:text-slate-600 shrink-0";
+            btnVen.className = "px-4 py-2 font-semibold text-slate-400 hover:text-slate-600 shrink-0";
+
+            if (subtabId === 'subtab-ing') {
+                btnIng.className = "px-4 py-2 font-bold text-purple-600 border-b-2 border-purple-600 shrink-0";
+            } else if (subtabId === 'subtab-pre') {
+                btnPre.className = "px-4 py-2 font-bold text-purple-600 border-b-2 border-purple-600 shrink-0";
+            } else {
+                btnVen.className = "px-4 py-2 font-bold text-purple-600 border-b-2 border-purple-600 shrink-0";
+            }
+        };
+
+        // ==========================================
+        // RENDERIZAÇÃO DA INTERFACE & GRÁFICOS
+        // ==========================================
+
+        function renderAll() {
+            renderDashboard();
+            renderProductsList();
+            renderSalesSelect();
+            renderSalesHistory();
+            renderProductDetail();
+            renderProdutosMaisVendidosChart();
+        }
+
+        // Renderiza Gráfico Chart.js
+        function renderProdutosMaisVendidosChart() {
+            const ctx = document.getElementById('chart-produtos-vendidos');
+            if (!ctx) return;
+
+            // Agrupa vendas por produto
+            const prodSalesCounts = {};
+            memorySales.forEach(s => {
+                prodSalesCounts[s.productName] = (prodSalesCounts[s.productName] || 0) + s.qty;
+            });
+
+            const labels = Object.keys(prodSalesCounts);
+            const dataValues = Object.values(prodSalesCounts);
+
+            if (salesChart) {
+                salesChart.destroy();
+            }
+
+            if (labels.length === 0) {
+                salesChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Sem Vendas'],
+                        datasets: [{
+                            data: [1],
+                            backgroundColor: ['#e2e8f0']
+                        }]
+                    },
+                    options: { responsive: true, plugins: { legend: { display: false } } }
+                });
+                return;
+            }
+
+            salesChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: dataValues,
+                        backgroundColor: ['#a855f7', '#ec4899', '#6366f1', '#f59e0b', '#10b981', '#3b82f6'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        // Renderiza Painel Principal (Dashboard)
+        function renderDashboard() {
+            let totalFaturamento = 0;
+            let totalLucroEstimado = 0;
+            let totalSalesCount = 0;
+
+            memorySales.forEach(sale => {
+                totalFaturamento += (sale.price * sale.qty);
+                totalSalesCount += sale.qty;
+
+                const prod = memoryProducts.find(p => p.name === sale.productName);
+                if (prod) {
+                    const totalCostIng = calculateTotalCost(prod.ingredients);
+                    const unitCost = prod.yield > 0 ? (totalCostIng / prod.yield) : 0;
+                    const unitProfit = sale.price - unitCost;
+                    totalLucroEstimado += (unitProfit * sale.qty);
+                } else {
+                    totalLucroEstimado += ((sale.price * sale.qty) * 0.5);
+                }
+            });
+
+            document.getElementById('home-lucro').textContent = `R$ ${totalLucroEstimado.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            document.getElementById('home-faturamento').textContent = `R$ ${totalFaturamento.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            document.getElementById('home-total-produtos').textContent = memoryProducts.length;
+            
+            const meta = currentUser ? currentUser.meta : 1500;
+            document.getElementById('home-meta').textContent = `R$ ${meta.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+            let percent = 0;
+            if (meta > 0) {
+                percent = Math.min(Math.round((totalLucroEstimado / meta) * 100), 100);
+            }
+            document.getElementById('meta-percent-text').textContent = `${percent}%`;
+            
+            const circle = document.getElementById('meta-progress-circle');
+            const offset = 175 - (175 * percent / 100);
+            circle.setAttribute('stroke-dashoffset', offset);
+
+            document.getElementById('stats-sales-count').textContent = `${totalSalesCount} un.`;
+            const missing = Math.max(meta - totalLucroEstimado, 0);
+            document.getElementById('stats-missing-meta').textContent = `R$ ${missing.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+            const prodSalesCounts = {};
+            memorySales.forEach(s => {
+                prodSalesCounts[s.productName] = (prodSalesCounts[s.productName] || 0) + s.qty;
+            });
+            let bestProdName = '-';
+            let maxVal = 0;
+            for (const key in prodSalesCounts) {
+                if (prodSalesCounts[key] > maxVal) {
+                    maxVal = prodSalesCounts[key];
+                    bestProdName = key;
+                }
+            }
+            document.getElementById('stats-best-product').textContent = bestProdName;
+        }
+
+        // Renderiza lista lateral de Produtos
+        function renderProductsList() {
+            const listContainer = document.getElementById('products-list');
+            document.getElementById('badge-prod-count').textContent = `${memoryProducts.length} Ativos`;
+
+            if (memoryProducts.length === 0) {
+                listContainer.innerHTML = `<p class="text-slate-400 text-xs text-center py-6">Nenhum produto cadastrado.</p>`;
+                return;
+            }
+
+            listContainer.innerHTML = '';
+            memoryProducts.forEach(prod => {
+                const totalCost = calculateTotalCost(prod.ingredients);
+                const item = document.createElement('div');
+                item.className = `p-4 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${selectedProduct && selectedProduct.id === prod.id ? 'bg-purple-50 border-purple-300 shadow-sm' : 'bg-slate-50 border-slate-100 hover:border-purple-200 hover:bg-white'}`;
+                
+                item.onclick = () => selectProduct(prod.id);
+
+                item.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="bg-purple-100 text-purple-700 w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs">
+                            <i class="fa-solid fa-cookie"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-800 text-sm">${prod.name}</h4>
+                            <p class="text-[10px] text-slate-500">Preço Venda: R$ ${parseFloat(prod.price || 0).toFixed(2)}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xs font-bold text-purple-700">R$ ${totalCost.toFixed(2)}</span>
+                        <p class="text-[8px] text-slate-400 uppercase tracking-widest block font-semibold">Custo total</p>
+                    </div>
+                `;
+                listContainer.appendChild(item);
+            });
+        }
+
+        function renderSalesSelect() {
+            const select = document.getElementById('sale-product-select');
+            select.innerHTML = '<option value="">-- Selecione o Produto --</option>';
+            memoryProducts.forEach(prod => {
+                const opt = document.createElement('option');
+                opt.value = prod.name;
+                opt.textContent = `${prod.name} (R$ ${parseFloat(prod.price || 0).toFixed(2)})`;
+                select.appendChild(opt);
+            });
+        }
+
+        function renderSalesHistory() {
+            const container = document.getElementById('sales-history-list');
+            if (memorySales.length === 0) {
+                container.innerHTML = `<p class="text-slate-400 text-xs text-center py-8">Nenhuma venda registada este mês.</p>`;
+                return;
+            }
+
+            container.innerHTML = '';
+            const sorted = [...memorySales].reverse();
+
+            sorted.forEach(sale => {
+                const formattedDate = new Date(sale.date).toLocaleDateString('pt-PT', { day: '2-digit', month: 'short' });
+                const el = document.createElement('div');
+                el.className = "flex items-center justify-between bg-slate-50 p-3.5 rounded-xl border border-slate-100 text-xs";
+                el.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="bg-pink-100 text-pink-600 w-8 h-8 rounded-lg flex items-center justify-center font-bold">
+                            ${sale.qty}x
+                        </div>
+                        <div>
+                            <h5 class="font-bold text-slate-800">${sale.productName}</h5>
+                            <p class="text-[10px] text-slate-500">${formattedDate}</p>
+                        </div>
+                    </div>
+                    <div class="text-right font-bold text-slate-900">
+                        R$ ${(sale.price * sale.qty).toFixed(2)}
+                    </div>
+                `;
+                container.appendChild(el);
+            });
+        }
+
+        function renderProductDetail() {
+            const placeholder = document.getElementById('no-product-selected');
+            const details = document.getElementById('product-detail-section');
+
+            if (!selectedProduct) {
+                placeholder.classList.remove('hidden');
+                details.classList.add('hidden');
+                return;
+            }
+
+            placeholder.classList.add('hidden');
+            details.classList.remove('hidden');
+            details.classList.add('fade-in');
+
+            document.getElementById('detail-product-title').textContent = selectedProduct.name;
+            document.getElementById('pricing-yield').value = selectedProduct.yield || 1;
+            document.getElementById('pricing-margin').value = selectedProduct.margin || 100;
+            document.getElementById('official-price-input').value = parseFloat(selectedProduct.price || 0).toFixed(2);
+
+            // Renderiza Tabela de Custos (Ingredientes + Outros)
+            const tbody = document.getElementById('ingredients-table-body');
+            tbody.innerHTML = '';
+
+            const items = selectedProduct.ingredients || [];
+
+            if (items.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="p-8 text-center text-slate-400">Nenhum custo ou ingrediente adicionado para este produto.</td>
+                    </tr>
+                `;
+            } else {
+                items.forEach((ing, index) => {
+                    const isOther = ing.type === 'outro';
+                    const row = document.createElement('tr');
+                    row.className = "hover:bg-slate-50/50 transition-colors";
+                    row.innerHTML = `
+                        <td class="p-4">
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${isOther ? 'bg-pink-100 text-pink-700' : 'bg-purple-100 text-purple-700'}">
+                                ${isOther ? 'Outro Custo' : 'Ingrediente'}
+                            </span>
+                        </td>
+                        <td class="p-4 font-semibold text-slate-800">${ing.name}</td>
+                        <td class="p-4 text-right font-bold text-slate-900">R$ ${parseFloat(ing.cost || 0).toFixed(2)}</td>
+                        <td class="p-4 text-center">
+                            <button onclick="deleteIngredient(${index})" class="text-red-500 hover:text-red-700 transition-colors"><i class="fa-regular fa-trash-can"></i></button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+
+            calculatePricing();
+            renderProductSalesTab();
+        }
+
+        // Renderiza sub-aba de Vendas Detalhadas do Produto
+        function renderProductSalesTab() {
+            if (!selectedProduct) return;
+
+            // Filtra as vendas deste produto específico
+            const sales = memorySales.filter(s => s.productName === selectedProduct.name);
+
+            // Custo Unitário Atual do Produto
+            const totalCost = calculateTotalCost(selectedProduct.ingredients);
+            const recipeYield = selectedProduct.yield || 1;
+            const unitCost = totalCost / recipeYield;
+
+            // Definir datas para comparação
+            const todayStr = '2026-06-07'; // Conforme mock atual de hoje
+            const yesterdayStr = '2026-06-06';
+
+            let hojeQty = 0, hojeFat = 0;
+            let ontemQty = 0, ontemFat = 0;
+            let mesQty = 0, mesFat = 0;
+
+            sales.forEach(sale => {
+                const saleDate = sale.date;
+                const totalSaleFat = sale.price * sale.qty;
+
+                // Acumula este mês (Junho 2026)
+                if (saleDate.startsWith('2026-06')) {
+                    mesQty += sale.qty;
+                    mesFat += totalSaleFat;
+                }
+
+                if (saleDate === todayStr) {
+                    hojeQty += sale.qty;
+                    hojeFat += totalSaleFat;
+                } else if (saleDate === yesterdayStr) {
+                    ontemQty += sale.qty;
+                    ontemFat += totalSaleFat;
+                }
+            });
+
+            // Cálculos Finais
+            const hojeCusto = hojeQty * unitCost;
+            const hojeLucro = hojeFat - hojeCusto;
+
+            const ontemCusto = ontemQty * unitCost;
+            const ontemLucro = ontemFat - ontemCusto;
+
+            const mesCusto = mesQty * unitCost;
+            const mesLucro = mesFat - mesCusto;
+
+            // Preenche na UI
+            document.getElementById('vendas-hoje-unidades').textContent = `${hojeQty} un.`;
+            document.getElementById('vendas-hoje-faturamento').textContent = `R$ ${hojeFat.toFixed(2)}`;
+            document.getElementById('vendas-hoje-custo').textContent = `R$ ${hojeCusto.toFixed(2)}`;
+            document.getElementById('vendas-hoje-lucro').textContent = `R$ ${hojeLucro.toFixed(2)}`;
+
+            document.getElementById('vendas-ontem-unidades').textContent = `${ontemQty} un.`;
+            document.getElementById('vendas-ontem-faturamento').textContent = `R$ ${ontemFat.toFixed(2)}`;
+            document.getElementById('vendas-ontem-custo').textContent = `R$ ${ontemCusto.toFixed(2)}`;
+            document.getElementById('vendas-ontem-lucro').textContent = `R$ ${ontemLucro.toFixed(2)}`;
+
+            document.getElementById('vendas-mes-unidades').textContent = `${mesQty} un.`;
+            document.getElementById('vendas-mes-faturamento').textContent = `R$ ${mesFat.toFixed(2)}`;
+            document.getElementById('vendas-mes-custo').textContent = `R$ ${mesCusto.toFixed(2)}`;
+            document.getElementById('vendas-mes-lucro').textContent = `R$ ${mesLucro.toFixed(2)}`;
+        }
+
+        // Auxiliar: Calcula Custo Total
+        function calculateTotalCost(ingredients) {
+            if (!ingredients) return 0;
+            return ingredients.reduce((sum, ing) => sum + parseFloat(ing.cost || 0), 0);
+        }
+
+        function selectProduct(id) {
+            selectedProduct = memoryProducts.find(p => p.id === id);
+            renderAll();
+        }
+
+        window.createNewProduct = async function() {
+            const input = document.getElementById('new-product-name');
+            const name = input.value.trim();
+            if (!name) return showAlert('Insira o nome do produto.', 'error');
+
+            const newProd = {
+                name: name,
+                yield: 1,
+                margin: 100,
+                price: 0,
+                ingredients: []
+            };
+
+            try {
+                if (db) {
+                    const prodRef = collection(db, 'artifacts', currentAppId, 'public', 'data', PRODUCTS_COLLECTION);
+                    const docAdded = await addDoc(prodRef, newProd);
+                    newProd.id = docAdded.id;
+                } else {
+                    newProd.id = 'prod-' + Date.now();
+                }
+
+                memoryProducts.push(newProd);
+                input.value = '';
+                selectedProduct = newProd;
+                showAlert(`Produto "${name}" criado com sucesso!`, 'success');
+                renderAll();
+            } catch (e) {
+                showAlert('Erro ao criar o produto.', 'error');
+            }
+        };
+
+        window.deleteCurrentProduct = async function() {
+            if (!selectedProduct) return;
+            if (!confirm(`Deseja mesmo apagar o produto "${selectedProduct.name}"?`)) return;
+
+            try {
+                if (db) {
+                    const pRef = doc(db, 'artifacts', currentAppId, 'public', 'data', PRODUCTS_COLLECTION, selectedProduct.id);
+                    await deleteDoc(pRef);
+                }
+                memoryProducts = memoryProducts.filter(p => p.id !== selectedProduct.id);
+                selectedProduct = null;
+                showAlert('Produto removido com sucesso!', 'success');
+                renderAll();
+            } catch (e) {
+                showAlert('Erro ao remover o produto.', 'error');
+            }
+        };
+
+        // ==========================================
+        // GESTÃO DE CUSTOS (INGREDIENTES & OUTROS)
+        // ==========================================
+
+        window.toggleIngredientModal = function(show) {
+            const modal = document.getElementById('ingredient-modal');
+            if (show) {
+                modal.classList.remove('hidden');
+                document.getElementById('ingredient-form').reset();
+            } else {
+                modal.classList.add('hidden');
+            }
+        };
+
+        window.toggleOtherCostModal = function(show) {
+            const modal = document.getElementById('other-cost-modal');
+            if (show) {
+                modal.classList.remove('hidden');
+                document.getElementById('other-cost-form').reset();
+            } else {
+                modal.classList.add('hidden');
+            }
+        };
+
+        // Submissão do Novo Ingrediente (Simplificado)
+        document.getElementById('ingredient-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!selectedProduct) return;
+
+            const name = document.getElementById('ing-name').value.trim();
+            const cost = parseFloat(document.getElementById('ing-package-cost').value) || 0;
+
+            const newIng = { name, cost, type: 'ingrediente' };
+
+            if (!selectedProduct.ingredients) selectedProduct.ingredients = [];
+            selectedProduct.ingredients.push(newIng);
+
+            await saveCurrentProductState();
+            toggleIngredientModal(false);
+            showAlert('Ingrediente adicionado!', 'success');
+            renderAll();
+        });
+
+        // Submissão de Outros Custos
+        document.getElementById('other-cost-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!selectedProduct) return;
+
+            const name = document.getElementById('cost-name').value.trim();
+            const cost = parseFloat(document.getElementById('cost-price').value) || 0;
+
+            const newCost = { name, cost, type: 'outro' };
+
+            if (!selectedProduct.ingredients) selectedProduct.ingredients = [];
+            selectedProduct.ingredients.push(newCost);
+
+            await saveCurrentProductState();
+            toggleOtherCostModal(false);
+            showAlert('Custo operacional adicionado!', 'success');
+            renderAll();
+        });
+
+        window.deleteIngredient = async function(index) {
+            if (!selectedProduct || !selectedProduct.ingredients) return;
+            selectedProduct.ingredients.splice(index, 1);
+            await saveCurrentProductState();
+            showAlert('Custo removido.', 'success');
+            renderAll();
+        };
+
+        window.calculatePricing = function() {
+            if (!selectedProduct) return;
+
+            const totalCost = calculateTotalCost(selectedProduct.ingredients);
+            document.getElementById('detail-total-custo-ingredientes').textContent = `R$ ${totalCost.toFixed(2)}`;
+
+            const recipeYield = parseFloat(document.getElementById('pricing-yield').value) || 1;
+            const margin = parseFloat(document.getElementById('pricing-margin').value) || 100;
+
+            const unitCost = recipeYield > 0 ? (totalCost / recipeYield) : 0;
+            document.getElementById('unit-cost-label').textContent = `R$ ${unitCost.toFixed(2)}`;
+
+            const suggestedPrice = unitCost + (unitCost * (margin / 100));
+            document.getElementById('suggested-price-unit').textContent = `R$ ${suggestedPrice.toFixed(2)}`;
+
+            const profitUnit = suggestedPrice - unitCost;
+            document.getElementById('suggested-profit-unit').textContent = `R$ ${profitUnit.toFixed(2)}`;
+        };
+
+        window.saveOfficialPrice = async function() {
+            if (!selectedProduct) return;
+            const officialPrice = parseFloat(document.getElementById('official-price-input').value) || 0;
+            const yieldVal = parseFloat(document.getElementById('pricing-yield').value) || 1;
+            const marginVal = parseFloat(document.getElementById('pricing-margin').value) || 100;
+
+            selectedProduct.price = officialPrice;
+            selectedProduct.yield = yieldVal;
+            selectedProduct.margin = marginVal;
+
+            await saveCurrentProductState();
+            showAlert('Preço de venda oficial guardado!', 'success');
+            renderAll();
+        };
+
+        async function saveCurrentProductState() {
+            if (!selectedProduct) return;
+            try {
+                if (db) {
+                    const pRef = doc(db, 'artifacts', currentAppId, 'public', 'data', PRODUCTS_COLLECTION, selectedProduct.id);
+                    await updateDoc(pRef, {
+                        ingredients: selectedProduct.ingredients || [],
+                        price: selectedProduct.price || 0,
+                        yield: selectedProduct.yield || 1,
+                        margin: selectedProduct.margin || 100
+                    });
+                }
+            } catch (e) {
+                console.error("Erro ao salvar produto.", e);
+            }
+        }
+
+        // ==========================================
+        // VENDAS & HISTÓRICO
+        // ==========================================
+
+        document.getElementById('sale-date').value = new Date().toISOString().split('T')[0];
+
+        document.getElementById('quick-sale-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const prodName = document.getElementById('sale-product-select').value;
+            const qty = parseInt(document.getElementById('sale-qty').value) || 1;
+            const date = document.getElementById('sale-date').value;
+
+            if (!prodName) return showAlert('Selecione um doce/produto.', 'error');
+
+            const prod = memoryProducts.find(p => p.name === prodName);
+            const price = prod ? prod.price : 0;
+
+            const newSale = {
+                productName: prodName,
+                qty: qty,
+                price: price,
+                date: date
+            };
+
+            try {
+                if (db) {
+                    const sRef = collection(db, 'artifacts', currentAppId, 'public', 'data', SALES_COLLECTION);
+                    const docAdded = await addDoc(sRef, newSale);
+                    newSale.id = docAdded.id;
+                } else {
+                    newSale.id = 'sale-' + Date.now();
+                }
+
+                memorySales.push(newSale);
+                showAlert('Venda registada!', 'success');
+                document.getElementById('quick-sale-form').reset();
+                document.getElementById('sale-date').value = new Date().toISOString().split('T')[0];
+                renderAll();
+            } catch (e) {
+                showAlert('Erro ao registar venda.', 'error');
+            }
+        });
+
+        window.clearSalesHistory = async function() {
+            if (!confirm('Deseja limpar todo o histórico de vendas?')) return;
+
+            try {
+                if (db) {
+                    for (const sale of memorySales) {
+                        const sRef = doc(db, 'artifacts', currentAppId, 'public', 'data', SALES_COLLECTION, sale.id);
+                        await deleteDoc(sRef);
+                    }
+                }
+                memorySales = [];
+                showAlert('Histórico de vendas reiniciado!', 'success');
+                renderAll();
+            } catch (e) {
+                showAlert('Erro ao remover histórico.', 'error');
+            }
+        };
+
+        // Lógica para Limpeza Completa da Base de Dados (Zona de Perigo)
+        window.clearFullDatabase = async function() {
+            if (!confirm('Tem a certeza absoluta de que deseja limpar TODA a sua base de dados? Todos os seus produtos registados, ingredientes, custos adicionais e histórico de vendas serão excluídos permanentemente.')) return;
+
+            try {
+                if (db) {
+                    // 1. Apaga todas as vendas do Firestore
+                    for (const sale of memorySales) {
+                        const sRef = doc(db, 'artifacts', currentAppId, 'public', 'data', SALES_COLLECTION, sale.id);
+                        await deleteDoc(sRef);
+                    }
+                    // 2. Apaga todos os produtos do Firestore
+                    for (const prod of memoryProducts) {
+                        const pRef = doc(db, 'artifacts', currentAppId, 'public', 'data', PRODUCTS_COLLECTION, prod.id);
+                        await deleteDoc(pRef);
+                    }
+                }
+                
+                // Reinicia as variáveis locais em memória
+                memorySales = [];
+                memoryProducts = [];
+                selectedProduct = null;
+                
+                showAlert('Base de dados PriceKup redefinida com sucesso!', 'success');
+                renderAll();
+            } catch (error) {
+                console.error("Erro ao redefinir base de dados:", error);
+                showAlert('Ocorreu um erro ao tentar redefinir a base de dados.', 'error');
+            }
+        };
+
+        // Configurações do Perfil
+        document.getElementById('settings-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUser) return;
+
+            const newName = document.getElementById('setting-name').value.trim();
+            const newMeta = parseFloat(document.getElementById('setting-meta').value) || 1500;
+
+            currentUser.name = newName;
+            currentUser.meta = newMeta;
+
+            try {
+                if (db && currentUser.id) {
+                    const uRef = doc(db, 'artifacts', currentAppId, 'public', 'data', USERS_COLLECTION, currentUser.id);
+                    await updateDoc(uRef, { name: newName, meta: newMeta });
+                }
+                
+                document.getElementById('user-display-name').textContent = newName;
+                document.getElementById('welcome-user-name').textContent = newName;
+                document.getElementById('profile-display-name').textContent = newName;
+                
+                showAlert('Alterações guardadas!', 'success');
+                renderAll();
+            } catch (e) {
+                showAlert('Erro ao salvar alterações.', 'error');
+            }
+        });
+
+    </script>
+</body>
+</html>
